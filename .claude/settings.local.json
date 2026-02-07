@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(echo:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx vite build)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
+      "WebFetch(domain:www.cdnfonts.com)",
+      "Bash(/opt/homebrew/bin/npx tsc --noEmit)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/bin:/bin:$PATH\")",
+      "Bash(git -C /Users/maelsiven/Documents/Code Projects/RCARDS status)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "card-001",
+    "name": "Twingo",
+    "rarity": "common",
+    "set": "Origines",
+    "description": "Un sourire dans la ville.",
+    "artworkUrl": "/textures/cards/card-001.png"
+  },
+  {
+    "id": "card-002",
+    "name": "Renault 5",
+    "rarity": "rare",
+    "set": "Origines",
+    "description": "La R5volution.",
+    "artworkUrl": "/textures/cards/card-002.png"
+  },
+  {
+    "id": "card-003",
+    "name": "Renault R25",
+    "rarity": "historique",
+    "set": "Origines",
+    "description": "L'arme du premier sacre.",
+    "artworkUrl": "/textures/cards/card-003.png"
+  },
+  {
+    "id": "card-004",
+    "name": "Renault R17",
+    "rarity": "concept",
+    "set": "Origines",
+    "description": "Le Rétro-Futurisme à la française.",
+    "artworkUrl": "/textures/cards/card-004.png"
+  }
+]

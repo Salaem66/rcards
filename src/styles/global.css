@@ -1,0 +1,255 @@
+@import url('https://fonts.cdnfonts.com/css/nouvel-r');
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #e0e0e0;
+  font-family: 'Nouvel R', sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  position: relative;
+  background: radial-gradient(ellipse at center, #0a0a1a 0%, #000000 70%);
+}
+
+/* ─── Canvas layer ─── */
+.canvas-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ─── UI overlay layer ─── */
+.ui-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.ui-overlay > * {
+  pointer-events: auto;
+}
+
+/* ─── Glassmorphism base ─── */
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ─── Gallery header ─── */
+.gallery-header {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 32px;
+  z-index: 20;
+}
+
+.gallery-header h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+}
+
+.gallery-header p {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* ─── Inspect overlay ─── */
+.inspect-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.inspect-back-button {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  pointer-events: auto;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+}
+
+.inspect-back-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.inspect-card-info {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 16px 28px;
+  pointer-events: auto;
+  text-align: center;
+  min-width: 260px;
+}
+
+.inspect-card-info h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 4px;
+}
+
+.inspect-card-info .rarity {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.inspect-card-info .rarity.common { color: #a0a0a0; }
+.inspect-card-info .rarity.uncommon { color: #50c878; }
+.inspect-card-info .rarity.rare { color: #6890e0; }
+.inspect-card-info .rarity.legendary { color: #ffb830; }
+.inspect-card-info .rarity.historique { color: #c8a87a; }
+.inspect-card-info .rarity.concept { color: #00ccff; }
+
+.inspect-card-info .description {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+}
+
+.inspect-actions {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.inspect-btn {
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+}
+
+.inspect-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* ─── Booster button (gallery) ─── */
+.booster-btn {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  z-index: 20;
+}
+
+.booster-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+.booster-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ─── Booster overlay ─── */
+.booster-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.booster-header {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.booster-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.booster-header p {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 6px;
+}
+
+.booster-actions {
+  position: absolute;
+  bottom: 32px;
+  right: 32px;
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+/* ─── Animations ─── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
