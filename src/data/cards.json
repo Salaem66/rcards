@@ -2,7 +2,7 @@
   {
     "id": "card-001",
     "name": "Twingo",
-    "rarity": "common",
+    "rarity": "classique",
     "set": "Origines",
     "description": "Un sourire dans la ville.",
     "artworkUrl": "/textures/cards/card-001.png"
@@ -10,7 +10,7 @@
   {
     "id": "card-002",
     "name": "Renault 5",
-    "rarity": "rare",
+    "rarity": "classique",
     "set": "Origines",
     "description": "La R5volution.",
     "artworkUrl": "/textures/cards/card-002.png"
@@ -30,5 +30,77 @@
     "set": "Origines",
     "description": "Le Rétro-Futurisme à la française.",
     "artworkUrl": "/textures/cards/card-004.png"
+  },
+  {
+    "id": "card-005",
+    "name": "Renault 5",
+    "rarity": "blueprint",
+    "set": "Origines",
+    "description": "Le plan originel de la mythique R5.",
+    "artworkUrl": "/textures/cards/blueprint R5.png"
+  },
+  {
+    "id": "card-006",
+    "name": "Twingo",
+    "rarity": "blueprint",
+    "set": "Origines",
+    "description": "Chaque courbe du sourire, tracée à la règle.",
+    "artworkUrl": "/textures/cards/blueprint Twingo.png"
+  },
+  {
+    "id": "card-007",
+    "name": "Renault 4",
+    "rarity": "blueprint",
+    "set": "Origines",
+    "description": "La voiture à vivre, née sur une planche à dessin.",
+    "artworkUrl": "/textures/cards/blueprint R4.png"
+  },
+  {
+    "id": "card-008",
+    "name": "Clio",
+    "rarity": "blueprint",
+    "set": "Origines",
+    "description": "Les secrets d'ingénierie de la citadine star.",
+    "artworkUrl": "/textures/cards/blueprint Clio.png"
+  },
+  {
+    "id": "card-009",
+    "name": "Clio 6",
+    "rarity": "classique",
+    "set": "Origines",
+    "description": "La sixième génération, toujours reine des villes.",
+    "artworkUrl": "/textures/cards/CLIO 6 - CLASSIQUE.png"
+  },
+  {
+    "id": "card-010",
+    "name": "Renault 4",
+    "rarity": "classique",
+    "set": "Origines",
+    "description": "La voiture à vivre, copine de toute la France.",
+    "artworkUrl": "/textures/cards/RENAULT 4 - CLASSIQUE.png"
+  },
+  {
+    "id": "card-011",
+    "name": "Estafette",
+    "rarity": "concept",
+    "set": "Origines",
+    "description": "L'utilitaire légendaire réinventé pour demain.",
+    "artworkUrl": "/textures/cards/ESTAFETTE - CONCEPT.png"
+  },
+  {
+    "id": "card-012",
+    "name": "R.S. 2027 Vision",
+    "rarity": "concept",
+    "set": "Origines",
+    "description": "La vision de Renault Sport pour le futur de la F1.",
+    "artworkUrl": "/textures/cards/R.S 2027 VISION - CONCEPT.png"
+  },
+  {
+    "id": "card-013",
+    "name": "Renault Emblème",
+    "rarity": "concept",
+    "set": "Origines",
+    "description": "Le SUV hydrogène qui repousse les limites du zéro émission.",
+    "artworkUrl": "/textures/cards/RENAULT EMBLEME - CONCEPT.png"
   }
 ]

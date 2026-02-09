@@ -1,19 +1,20 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useMemo, useState, useCallback, useEffect } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useCardGeometry, CARD_DEPTH, CARD_BEVEL_THICKNESS } from './CardGeometry'
+import { HOLO_VERTEX, HOLO_FRAGMENT } from './holoShaders'
 import type { Card } from '@/data/types'
 import { lerp, clamp } from '@/utils/mathUtils'
 
 const textureLoader = new THREE.TextureLoader()
 
 const EDGE_COLORS: Record<string, string> = {
-  common: '#e8e0d8',
+  classique: '#e8e0d8',
   uncommon: '#c0c0c0',
-  rare: '#c0a040',
   legendary: '#ffb830',
   historique: '#8b6914',
   concept: '#00ccff',
+  blueprint: '#4fc3f7',
 }
 
 // Maximum tilt angle in radians (~12 degrees)
@@ -116,9 +117,38 @@ export function CardMesh({
     groupRef.current.rotation.y = a.tiltY + a.flipY
   })
 
-  const edgeColor = EDGE_COLORS[card.rarity] ?? EDGE_COLORS.common
+  const isBlueprint = card.rarity === 'blueprint'
+  const edgeColor = EDGE_COLORS[card.rarity] ?? EDGE_COLORS.classique
   const artworkTexture = useCardArtworkTexture(card)
   const backTexture = useBackTexture()
+
+  // Holographic overlay for blueprint cards (front + back)
+  const holoFrontRef = useRef<THREE.ShaderMaterial>(null!)
+  const holoBackRef = useRef<THREE.ShaderMaterial>(null!)
+  const holoFrontUniforms = useMemo(() => ({
+    uBandPosition: { value: 0.5 },
+    uIntensity: { value: 0.0 },
+  }), [])
+  const holoBackUniforms = useMemo(() => ({
+    uBandPosition: { value: 0.5 },
+    uIntensity: { value: 0.0 },
+  }), [])
+
+  // Drive holo band from tilt + hover
+  useFrame(() => {
+    if (!isBlueprint) return
+    const a = anim.current
+    const bandPos = (-a.tiltX / MAX_TILT) * 0.4 + 0.5
+    const intensity = hovered ? 0.21 : 0.0
+    if (holoFrontRef.current) {
+      holoFrontRef.current.uniforms.uBandPosition!.value = bandPos
+      holoFrontRef.current.uniforms.uIntensity!.value = intensity
+    }
+    if (holoBackRef.current) {
+      holoBackRef.current.uniforms.uBandPosition!.value = bandPos
+      holoBackRef.current.uniforms.uIntensity!.value = intensity
+    }
+  })
 
   return (
     <group
@@ -130,45 +160,83 @@ export function CardMesh({
       onPointerLeave={handlePointerLeave}
     >
       {/* Card body + edge */}
-      <mesh geometry={edgeGeometry} renderOrder={0}>
+      <mesh geometry={edgeGeometry} renderOrder={isBlueprint ? 2 : 0}>
         <meshPhysicalMaterial
           color={edgeColor}
-          roughness={0.3}
-          metalness={0.6}
-          clearcoat={0.5}
-          clearcoatRoughness={0.1}
-          emissive={hovered ? edgeColor : '#000000'}
-          emissiveIntensity={hovered ? 0.2 : 0}
+          roughness={isBlueprint ? 0.1 : 0.3}
+          metalness={isBlueprint ? 0.4 : 0.6}
+          clearcoat={isBlueprint ? 1.0 : 0.5}
+          clearcoatRoughness={isBlueprint ? 0.03 : 0.1}
+          transparent={isBlueprint}
+          opacity={isBlueprint ? 0.1 : 1}
+          depthWrite={!isBlueprint}
+          emissive={isBlueprint ? edgeColor : (hovered ? edgeColor : '#000000')}
+          emissiveIntensity={isBlueprint ? 0.15 : (hovered ? 0.2 : 0)}
           polygonOffset
           polygonOffsetFactor={1}
           polygonOffsetUnits={1}
         />
       </mesh>
       {/* Front face */}
-      <mesh geometry={faceGeometry} position={[0, 0, CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001]} renderOrder={1}>
+      <mesh geometry={faceGeometry} position={[0, 0, CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001]} renderOrder={isBlueprint ? 3 : 1}>
         <meshPhysicalMaterial
           map={artworkTexture}
-          roughness={0.4}
-          metalness={0.04}
-          clearcoat={0.4}
-          clearcoatRoughness={0.15}
-          envMapIntensity={0.6}
+          roughness={isBlueprint ? 0.1 : 0.4}
+          metalness={isBlueprint ? 0.2 : 0.04}
+          clearcoat={isBlueprint ? 1.0 : 0.4}
+          clearcoatRoughness={isBlueprint ? 0.03 : 0.15}
+          envMapIntensity={isBlueprint ? 1.2 : 0.6}
+          transparent={isBlueprint}
+          opacity={isBlueprint ? 0.5 : 1}
+          depthWrite={!isBlueprint}
+          emissive={isBlueprint ? '#4fc3f7' : '#000000'}
+          emissiveIntensity={isBlueprint ? 0.08 : 0}
           side={THREE.DoubleSide}
         />
       </mesh>
-      {/* Back face */}
-      <mesh geometry={faceGeometry} position={[0, 0, -(CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001)]} rotation={[0, Math.PI, 0]} renderOrder={1}>
-        <meshPhysicalMaterial
-          map={backTexture}
-          color="#ffffff"
-          roughness={0.4}
-          metalness={0.04}
-          clearcoat={0.4}
-          clearcoatRoughness={0.15}
-          envMapIntensity={0.6}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      {/* Holographic rainbow overlay — front */}
+      {isBlueprint && (
+        <mesh geometry={faceGeometry} position={[0, 0, CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.002]} renderOrder={4}>
+          <shaderMaterial
+            ref={holoFrontRef}
+            vertexShader={HOLO_VERTEX}
+            fragmentShader={HOLO_FRAGMENT}
+            uniforms={holoFrontUniforms}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+      {/* Holographic rainbow overlay — back */}
+      {isBlueprint && (
+        <mesh geometry={faceGeometry} position={[0, 0, -(CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.002)]} rotation={[0, Math.PI, 0]} renderOrder={4}>
+          <shaderMaterial
+            ref={holoBackRef}
+            vertexShader={HOLO_VERTEX}
+            fragmentShader={HOLO_FRAGMENT}
+            uniforms={holoBackUniforms}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+      {/* Back face — blueprint cards have no back */}
+      {!isBlueprint && (
+        <mesh geometry={faceGeometry} position={[0, 0, -(CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001)]} rotation={[0, Math.PI, 0]} renderOrder={1}>
+          <meshPhysicalMaterial
+            map={backTexture}
+            color="#ffffff"
+            roughness={0.4}
+            metalness={0.04}
+            clearcoat={0.4}
+            clearcoatRoughness={0.15}
+            envMapIntensity={0.6}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      )}
     </group>
   )
 }
@@ -249,14 +317,14 @@ function createFallbackTexture(card: Card): THREE.Texture {
   const ctx = canvas.getContext('2d')!
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
   const colors: Record<string, [string, string]> = {
-    common: ['#3a3a4a', '#2a2a3a'],
+    classique: ['#3a3a4a', '#2a2a3a'],
     uncommon: ['#2a4a3a', '#1a3a2a'],
-    rare: ['#3a3a5a', '#2a2a4a'],
     legendary: ['#4a2a1a', '#3a1a0a'],
     historique: ['#3a3020', '#2a2010'],
     concept: ['#102a3a', '#081a2a'],
+    blueprint: ['#0a2a3a', '#051520'],
   }
-  const [c1, c2] = colors[card.rarity] ?? colors.common!
+  const [c1, c2] = colors[card.rarity] ?? colors.classique!
   gradient.addColorStop(0, c1!)
   gradient.addColorStop(1, c2!)
   ctx.fillStyle = gradient
@@ -278,12 +346,12 @@ function createFallbackTexture(card: Card): THREE.Texture {
   ctx.font = '100px serif'
   ctx.fillStyle = 'rgba(255, 255, 255, 0.12)'
   const symbols: Record<string, string> = {
-    common: '\u25C6',
+    classique: '\u25C6',
     uncommon: '\u25C8',
-    rare: '\u2605',
     legendary: '\u2726',
     historique: '\u2302',
     concept: '\u2B22',
+    blueprint: '\u2B21',
   }
   ctx.fillText(symbols[card.rarity] ?? '\u25C6', canvas.width / 2, canvas.height / 2 + 30)
 

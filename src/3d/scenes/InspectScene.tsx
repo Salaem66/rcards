@@ -1,7 +1,8 @@
-import { useRef, useCallback, useState, useEffect } from 'react'
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useCardGeometry, CARD_DEPTH, CARD_BEVEL_THICKNESS } from '@/3d/card/CardGeometry'
+import { HOLO_VERTEX, HOLO_FRAGMENT } from '@/3d/card/holoShaders'
 import { EnvironmentMap } from '@/3d/environment/EnvironmentMap'
 import type { Card } from '@/data/types'
 import { lerp, clamp } from '@/utils/mathUtils'
@@ -9,12 +10,12 @@ import { lerp, clamp } from '@/utils/mathUtils'
 const textureLoader = new THREE.TextureLoader()
 
 const EDGE_COLORS: Record<string, string> = {
-  common: '#e8e0d8',
+  classique: '#e8e0d8',
   uncommon: '#c0c0c0',
-  rare: '#c0a040',
   legendary: '#ffb830',
   historique: '#8b6914',
   concept: '#00ccff',
+  blueprint: '#4fc3f7',
 }
 
 // Drag rotation settings
@@ -136,9 +137,37 @@ export function InspectScene({ card, flipped, onFlip }: InspectSceneProps) {
     }
   })
 
-  const edgeColor = EDGE_COLORS[card.rarity] ?? EDGE_COLORS.common
+  const isBlueprint = card.rarity === 'blueprint'
+  const edgeColor = EDGE_COLORS[card.rarity] ?? EDGE_COLORS.classique
   const artworkTexture = useInspectArtworkTexture(card)
   const backTexture = useInspectBackTexture()
+
+  // Holographic overlay for blueprint cards (front + back)
+  const holoFrontRef = useRef<THREE.ShaderMaterial>(null!)
+  const holoBackRef = useRef<THREE.ShaderMaterial>(null!)
+  const holoFrontUniforms = useMemo(() => ({
+    uBandPosition: { value: 0.5 },
+    uIntensity: { value: 0.0 },
+  }), [])
+  const holoBackUniforms = useMemo(() => ({
+    uBandPosition: { value: 0.5 },
+    uIntensity: { value: 0.0 },
+  }), [])
+
+  // Drive holo band from drag rotation — constant intensity
+  useFrame(() => {
+    if (!isBlueprint) return
+    const d = drag.current
+    const bandPos = (-d.rotX / MAX_TILT_X) * 0.4 + 0.5
+    if (holoFrontRef.current) {
+      holoFrontRef.current.uniforms.uBandPosition!.value = bandPos
+      holoFrontRef.current.uniforms.uIntensity!.value = 0.2
+    }
+    if (holoBackRef.current) {
+      holoBackRef.current.uniforms.uBandPosition!.value = bandPos
+      holoBackRef.current.uniforms.uIntensity!.value = 0.2
+    }
+  })
 
   return (
     <>
@@ -178,44 +207,84 @@ export function InspectScene({ card, flipped, onFlip }: InspectSceneProps) {
         onDoubleClick={handleDoubleClick}
       >
         {/* Card body + edge */}
-        <mesh geometry={edgeGeometry} renderOrder={0}>
+        <mesh geometry={edgeGeometry} renderOrder={isBlueprint ? 2 : 0}>
           <meshPhysicalMaterial
             color={edgeColor}
-            roughness={0.25}
-            metalness={0.7}
-            clearcoat={0.6}
-            clearcoatRoughness={0.08}
+            roughness={isBlueprint ? 0.1 : 0.25}
+            metalness={isBlueprint ? 0.4 : 0.7}
+            clearcoat={isBlueprint ? 1.0 : 0.6}
+            clearcoatRoughness={isBlueprint ? 0.03 : 0.08}
             envMapIntensity={1.0}
+            transparent={isBlueprint}
+            opacity={isBlueprint ? 0.1 : 1}
+            depthWrite={!isBlueprint}
+            emissive={isBlueprint ? edgeColor : '#000000'}
+            emissiveIntensity={isBlueprint ? 0.2 : 0}
             polygonOffset
             polygonOffsetFactor={1}
             polygonOffsetUnits={1}
           />
         </mesh>
         {/* Front face */}
-        <mesh geometry={faceGeometry} position={[0, 0, CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001]} renderOrder={1}>
+        <mesh geometry={faceGeometry} position={[0, 0, CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001]} renderOrder={isBlueprint ? 3 : 1}>
           <meshPhysicalMaterial
             map={artworkTexture}
-            roughness={0.35}
-            metalness={0.04}
-            clearcoat={0.4}
-            clearcoatRoughness={0.1}
-            envMapIntensity={0.72}
+            roughness={isBlueprint ? 0.1 : 0.35}
+            metalness={isBlueprint ? 0.2 : 0.04}
+            clearcoat={isBlueprint ? 1.0 : 0.4}
+            clearcoatRoughness={isBlueprint ? 0.03 : 0.1}
+            envMapIntensity={isBlueprint ? 1.2 : 0.72}
+            transparent={isBlueprint}
+            opacity={isBlueprint ? 0.5 : 1}
+            depthWrite={!isBlueprint}
+            emissive={isBlueprint ? '#4fc3f7' : '#000000'}
+            emissiveIntensity={isBlueprint ? 0.12 : 0}
             side={THREE.DoubleSide}
           />
         </mesh>
-        {/* Back face */}
-        <mesh geometry={faceGeometry} position={[0, 0, -(CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001)]} rotation={[0, Math.PI, 0]} renderOrder={1}>
-          <meshPhysicalMaterial
-            map={backTexture}
-            color="#ffffff"
-            roughness={0.35}
-            metalness={0.04}
-            clearcoat={0.4}
-            clearcoatRoughness={0.1}
-            envMapIntensity={0.72}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+        {/* Holographic rainbow overlay — front */}
+        {isBlueprint && (
+          <mesh geometry={faceGeometry} position={[0, 0, CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.002]} renderOrder={4}>
+            <shaderMaterial
+              ref={holoFrontRef}
+              vertexShader={HOLO_VERTEX}
+              fragmentShader={HOLO_FRAGMENT}
+              uniforms={holoFrontUniforms}
+              transparent
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        )}
+        {/* Holographic rainbow overlay — back */}
+        {isBlueprint && (
+          <mesh geometry={faceGeometry} position={[0, 0, -(CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.002)]} rotation={[0, Math.PI, 0]} renderOrder={4}>
+            <shaderMaterial
+              ref={holoBackRef}
+              vertexShader={HOLO_VERTEX}
+              fragmentShader={HOLO_FRAGMENT}
+              uniforms={holoBackUniforms}
+              transparent
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        )}
+        {/* Back face — blueprint cards have no back */}
+        {!isBlueprint && (
+          <mesh geometry={faceGeometry} position={[0, 0, -(CARD_DEPTH / 2 + CARD_BEVEL_THICKNESS + 0.001)]} rotation={[0, Math.PI, 0]} renderOrder={1}>
+            <meshPhysicalMaterial
+              map={backTexture}
+              color="#ffffff"
+              roughness={0.35}
+              metalness={0.04}
+              clearcoat={0.4}
+              clearcoatRoughness={0.1}
+              envMapIntensity={0.72}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        )}
       </group>
     </>
   )

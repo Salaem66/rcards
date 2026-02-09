@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Card } from '@/data/types'
+import type { Card, CardRarity } from '@/data/types'
 
 export type ViewMode = 'gallery' | 'inspect' | 'booster'
 export type GpuTier = 'high' | 'medium' | 'low'
@@ -8,6 +8,7 @@ export type BoosterState = 'pack' | 'opening' | 'revealing' | 'summary'
 interface CardStore {
   cards: Card[]
   selectedCardId: string | null
+  selectedRarity: CardRarity | null
   viewMode: ViewMode
   gpuTier: GpuTier
 
@@ -19,6 +20,7 @@ interface CardStore {
   setCards: (cards: Card[]) => void
   selectCard: (id: string) => void
   deselectCard: () => void
+  setSelectedRarity: (rarity: CardRarity | null) => void
   setViewMode: (mode: ViewMode) => void
   setGpuTier: (tier: GpuTier) => void
 
@@ -33,6 +35,7 @@ interface CardStore {
 export const useCardStore = create<CardStore>((set) => ({
   cards: [],
   selectedCardId: null,
+  selectedRarity: null,
   viewMode: 'gallery',
   gpuTier: 'high',
 
@@ -43,6 +46,7 @@ export const useCardStore = create<CardStore>((set) => ({
   setCards: (cards) => set({ cards }),
   selectCard: (id) => set({ selectedCardId: id, viewMode: 'inspect' }),
   deselectCard: () => set({ selectedCardId: null, viewMode: 'gallery' }),
+  setSelectedRarity: (rarity) => set({ selectedRarity: rarity }),
   setViewMode: (mode) => set({ viewMode: mode }),
   setGpuTier: (tier) => set({ gpuTier: tier }),
 

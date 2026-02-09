@@ -1,12 +1,12 @@
 import { Canvas } from '@react-three/fiber'
-import { Suspense, useState, useCallback } from 'react'
+import { Suspense, useState, useCallback, useMemo } from 'react'
 import { GalleryScene } from '@/3d/scenes/GalleryScene'
 import { InspectScene } from '@/3d/scenes/InspectScene'
 import { BoosterScene } from '@/3d/scenes/BoosterScene'
 import { ZoomController } from '@/3d/controls/ZoomController'
 import { useCardData } from '@/hooks/useCardData'
 import { useCardStore } from '@/hooks/useCardStore'
-import type { Card } from '@/data/types'
+import type { Card, CardRarity } from '@/data/types'
 import './styles/global.css'
 
 /** Pull 5 random cards from the pool (duplicates allowed). */
@@ -23,8 +23,64 @@ export default function App() {
   const cards = useCardData()
   const viewMode = useCardStore((s) => s.viewMode)
   const selectedCardId = useCardStore((s) => s.selectedCardId)
+  const selectedRarity = useCardStore((s) => s.selectedRarity)
   const selectCard = useCardStore((s) => s.selectCard)
   const deselectCard = useCardStore((s) => s.deselectCard)
+  const setSelectedRarity = useCardStore((s) => s.setSelectedRarity)
+
+  // Get unique rarities present in the card pool
+  const availableRarities = useMemo(() => {
+    const rarities = new Set(cards.map((c) => c.rarity))
+    return Array.from(rarities) as CardRarity[]
+  }, [cards])
+
+  // Rarity display order
+  const RARITY_ORDER: Record<CardRarity, number> = {
+    classique: 0,
+    concept: 1,
+    blueprint: 2,
+    historique: 3,
+    uncommon: 4,
+    legendary: 5,
+  }
+
+  // Filter cards by selected rarity, sort by rarity when showing all
+  const filteredCards = useMemo(() => {
+    const list = selectedRarity ? cards.filter((c) => c.rarity === selectedRarity) : cards
+    return [...list].sort((a, b) => (RARITY_ORDER[a.rarity] ?? 99) - (RARITY_ORDER[b.rarity] ?? 99))
+  }, [cards, selectedRarity])
+
+  // Compute gallery content height (accounts for rarity separators)
+  const galleryContentHeight = useMemo(() => {
+    const SPACING_Y = 4.0
+    const SEPARATOR_HEIGHT = 0.42
+    const COLUMNS = 4
+    let groups = 0
+    let totalRows = 0
+    let prevRarity: string | null = null
+    for (const card of filteredCards) {
+      if (card.rarity !== prevRarity) {
+        groups++
+        prevRarity = card.rarity
+      }
+    }
+    // Count card rows per group
+    prevRarity = null
+    let groupCount = 0
+    for (const card of filteredCards) {
+      if (card.rarity !== prevRarity) {
+        if (prevRarity !== null) {
+          totalRows += Math.ceil(groupCount / COLUMNS)
+        }
+        prevRarity = card.rarity
+        groupCount = 0
+      }
+      groupCount++
+    }
+    if (prevRarity !== null) totalRows += Math.ceil(groupCount / COLUMNS)
+    const separatorSpace = Math.max(0, groups - 1) * (SEPARATOR_HEIGHT / SPACING_Y) + groups * 0.175
+    return (totalRows + separatorSpace) * SPACING_Y
+  }, [filteredCards])
 
   const boosterState = useCardStore((s) => s.boosterState)
   const boosterCards = useCardStore((s) => s.boosterCards)
@@ -89,10 +145,10 @@ export default function App() {
           }}
         >
           <Suspense fallback={null}>
-            <ZoomController viewMode={viewMode} />
+            <ZoomController viewMode={viewMode} contentHeight={galleryContentHeight} />
             {viewMode === 'gallery' && (
               <GalleryScene
-                cards={cards}
+                cards={filteredCards}
                 onSelectCard={handleSelectCard}
               />
             )}
@@ -120,9 +176,24 @@ export default function App() {
       {/* UI Overlays */}
       {viewMode === 'gallery' && (
         <div className="ui-overlay">
-          <div className="gallery-header glass">
-            <h1>MY R:CARDS</h1>
-            <p>{cards.length} cards in collection</p>
+          <div className="gallery-top">
+            <div className="filter-bar">
+              <button
+                className={`filter-btn glass${selectedRarity === null ? ' active' : ''}`}
+                onClick={() => setSelectedRarity(null)}
+              >
+                TOUT
+              </button>
+              {availableRarities.map((rarity) => (
+                <button
+                  key={rarity}
+                  className={`filter-btn glass${selectedRarity === rarity ? ' active' : ''}`}
+                  onClick={() => setSelectedRarity(rarity)}
+                >
+                  <span className={`filter-label ${rarity}`}>{rarity.toUpperCase()}</span>
+                </button>
+              ))}
+            </div>
           </div>
           <button
             className="booster-btn glass"

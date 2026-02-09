@@ -58,14 +58,21 @@ body,
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* ─── Gallery header ─── */
-.gallery-header {
+/* ─── Gallery top (header + filters) ─── */
+.gallery-top {
   position: absolute;
   top: 24px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 14px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   z-index: 20;
+}
+
+.gallery-header {
+  padding: 14px 32px;
 }
 
 .gallery-header h1 {
@@ -84,6 +91,46 @@ body,
   text-align: center;
   margin-top: 2px;
 }
+
+/* ─── Filter bar ─── */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 90vw;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.filter-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.filter-label { color: inherit; }
+.filter-label.classique { color: #a0a0a0; }
+.filter-label.uncommon { color: #50c878; }
+.filter-label.legendary { color: #ffb830; }
+.filter-label.historique { color: #c8a87a; }
+.filter-label.concept { color: #daa520; }
+.filter-label.blueprint { color: #1a3cba; }
 
 /* ─── Inspect overlay ─── */
 .inspect-overlay {
@@ -138,12 +185,12 @@ body,
   margin-bottom: 8px;
 }
 
-.inspect-card-info .rarity.common { color: #a0a0a0; }
+.inspect-card-info .rarity.classique { color: #a0a0a0; }
 .inspect-card-info .rarity.uncommon { color: #50c878; }
-.inspect-card-info .rarity.rare { color: #6890e0; }
 .inspect-card-info .rarity.legendary { color: #ffb830; }
 .inspect-card-info .rarity.historique { color: #c8a87a; }
-.inspect-card-info .rarity.concept { color: #00ccff; }
+.inspect-card-info .rarity.concept { color: #daa520; }
+.inspect-card-info .rarity.blueprint { color: #1a3cba; }
 
 .inspect-card-info .description {
   font-size: 13px;
