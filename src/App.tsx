@@ -78,7 +78,7 @@ export default function App() {
       groupCount++
     }
     if (prevRarity !== null) totalRows += Math.ceil(groupCount / COLUMNS)
-    const separatorSpace = Math.max(0, groups - 1) * (SEPARATOR_HEIGHT / SPACING_Y) + groups * 0.175
+    const separatorSpace = Math.max(0, groups - 1) * (SEPARATOR_HEIGHT / SPACING_Y) + groups * 0.25
     return (totalRows + separatorSpace) * SPACING_Y
   }, [filteredCards])
 

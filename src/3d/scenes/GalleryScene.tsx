@@ -14,7 +14,7 @@ const COLUMNS = 4
 const SPACING_X = 3.2
 const SPACING_Y = 4.0
 const SEPARATOR_HEIGHT = 0.42
-const LABEL_ROW = 0.175
+const LABEL_ROW = 0.25
 
 const RARITY_LABELS: Record<string, string> = {
   classique: 'CLASSIQUE',
