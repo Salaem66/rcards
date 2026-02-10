@@ -176,6 +176,7 @@ export default function App() {
       {/* UI Overlays */}
       {viewMode === 'gallery' && (
         <div className="ui-overlay">
+          <img src={`${import.meta.env.BASE_URL}renault-logo.svg`} alt="Renault" className="renault-logo" />
           <div className="gallery-top">
             <div className="filter-bar">
               <button
@@ -195,13 +196,6 @@ export default function App() {
               ))}
             </div>
           </div>
-          <button
-            className="booster-btn glass"
-            onClick={handleOpenBooster}
-            disabled={cards.length === 0}
-          >
-            Ouvrir un booster
-          </button>
         </div>
       )}
 

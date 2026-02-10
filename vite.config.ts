@@ -4,6 +4,7 @@ import glsl from 'vite-plugin-glsl'
 import path from 'path'
 
 export default defineConfig({
+  base: '/rcards/',
   plugins: [react(), glsl()],
   resolve: {
     alias: {

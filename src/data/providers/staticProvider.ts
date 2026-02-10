@@ -3,7 +3,10 @@ import type { Card } from '../types'
 import cardsData from '../cards.json'
 
 export class StaticProvider implements CardDataProvider {
-  private cards: Card[] = cardsData as Card[]
+  private cards: Card[] = (cardsData as Card[]).map(c => ({
+    ...c,
+    artworkUrl: import.meta.env.BASE_URL + c.artworkUrl.replace(/^\//, ''),
+  }))
 
   async getCards(): Promise<Card[]> {
     return this.cards

@@ -302,7 +302,7 @@ function usePackTexture(): THREE.Texture {
   useEffect(() => {
     let cancelled = false
     textureLoader.load(
-      '/textures/backs/card-back.png',
+      `${import.meta.env.BASE_URL}textures/backs/card-back.png`,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace
         if (!cancelled) setTexture(tex)
@@ -561,7 +561,7 @@ function useBoosterBackTexture(): THREE.Texture {
   useEffect(() => {
     let cancelled = false
     textureLoader.load(
-      '/textures/backs/card-back.png',
+      `${import.meta.env.BASE_URL}textures/backs/card-back.png`,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace
         if (!cancelled) setTexture(tex)

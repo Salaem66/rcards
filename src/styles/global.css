@@ -46,6 +46,23 @@ body,
   pointer-events: auto;
 }
 
+/* ─── Renault Logo ─── */
+.renault-logo {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  transition: opacity 0.3s ease;
+}
+
+.renault-logo:hover {
+  opacity: 1;
+}
+
 /* ─── Glassmorphism base ─── */
 .glass {
   background: rgba(255, 255, 255, 0.06);
@@ -61,7 +78,7 @@ body,
 /* ─── Gallery top (header + filters) ─── */
 .gallery-top {
   position: absolute;
-  top: 24px;
+  top: 32px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;

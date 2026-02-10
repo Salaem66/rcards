@@ -46,8 +46,9 @@ export function ZoomController({ viewMode, contentHeight = 0 }: ZoomControllerPr
     function handleWheel(e: WheelEvent) {
       e.preventDefault()
       if (viewMode === 'gallery') {
-        const maxScroll = Math.max(0, contentHeight / 2)
-        targetY.current = clamp(targetY.current - e.deltaY * SCROLL_SPEED, -maxScroll, maxScroll)
+        const maxScrollDown = Math.max(0, contentHeight / 2)
+        const maxScrollUp = contentHeight > 0 ? contentHeight / 2 - 3.5 : 0
+        targetY.current = clamp(targetY.current - e.deltaY * SCROLL_SPEED, -maxScrollDown, maxScrollUp)
       } else {
         const delta = e.deltaY > 0 ? ZOOM_SPEED : -ZOOM_SPEED
         targetZ.current = clamp(targetZ.current + delta, limits.min, limits.max)

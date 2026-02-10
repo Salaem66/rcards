@@ -42,6 +42,13 @@ export function CardMesh({
   const groupRef = useRef<THREE.Group>(null!)
   const { edgeGeometry, faceGeometry } = useCardGeometry()
   const [hovered, setHovered] = useState(false)
+  const [opacity, setOpacity] = useState(0)
+
+  // Fade in effect to avoid flash of unstyled cards
+  useEffect(() => {
+    const timer = setTimeout(() => setOpacity(1), 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Smooth animation values (current / target)
   const anim = useRef({
@@ -158,6 +165,7 @@ export function CardMesh({
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      scale={opacity}
     >
       {/* Card body + edge */}
       <mesh geometry={edgeGeometry} renderOrder={isBlueprint ? 2 : 0}>
@@ -295,7 +303,7 @@ function useBackTexture(): THREE.Texture {
   useEffect(() => {
     let cancelled = false
     textureLoader.load(
-      '/textures/backs/card-back.png',
+      `${import.meta.env.BASE_URL}textures/backs/card-back.png`,
       (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace
         if (!cancelled) setTexture(tex)
